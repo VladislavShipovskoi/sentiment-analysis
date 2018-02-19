@@ -1,25 +1,25 @@
 # -*- coding: utf-8 -*-
-import csv
-import random
-import re
-import string
-import joblib
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import pymorphy2
-from nltk.tokenize import TweetTokenizer
-from sklearn import metrics
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import ShuffleSplit
-from sklearn.model_selection import learning_curve
-from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import learning_curve
+from sklearn.model_selection import ShuffleSplit
+from sklearn.metrics import accuracy_score
+from nltk.tokenize import TweetTokenizer
 from sklearn.pipeline import Pipeline
 from sklearn.svm import LinearSVC
+import matplotlib.pyplot as plt
+from sklearn import metrics
+import pandas as pd
+import numpy as np
+import random
+import string
+import joblib
+import csv
+import re
+import os
 
 
-def clean_tweets(a, pos_words, neg_words, obscene, pos_emoji, neg_emoji):
+def clean_tweets(a, pos_words,pos_emoji, neg_emoji,neg_words, obscene):
     tknzr = TweetTokenizer()
     a = tknzr.tokenize(a)
 
@@ -52,52 +52,22 @@ def clean_tweets(a, pos_words, neg_words, obscene, pos_emoji, neg_emoji):
     return cleantweet
 
 
-def load_dict():
-    with open('data/dictionary/pos_words.txt') as f:
-        pos_words = f.read().splitlines()
-
-    with open('data/dictionary/neg_words.txt') as f:
-        neg_words = f.read().splitlines()
-
-    with open('data/dictionary/stop_words.txt') as f:
-        stop_words = f.read().splitlines()
-
-    with open('data/dictionary/obscene.txt') as f:
-        obscene_words = f.read().splitlines()
-
-    with open('data/dictionary/possmile.txt') as f:
-        pos_emoji = f.read().splitlines()
-
-    with open('data/dictionary/negsmile.txt') as f:
-        neg_emoji = f.read().splitlines()
-
-    return pos_words, neg_words, stop_words, obscene_words, pos_emoji, neg_emoji
-
-
 def load_data():
-    data, text, sentiment = list(), list(), list()
-    pos_words, neg_words, stop_words, obscene, pos_emoji, neg_emoji = load_dict()
+    texts_path = 'data/tweets/'
+    dictionaries_path = 'data/dictionary/'
+    data, text, sentiment,dictionaries = list(), list(), list(), list()
+    for filename in os.listdir(dictionaries_path):
+        with open(dictionaries_path + filename) as f:
+            dictionary = f.read().splitlines()
+            dictionaries.append(dictionary)
 
-    neu_csv_file = open('data/tweets/neutral.csv', "r", encoding='utf-8')
-    reader = csv.reader(neu_csv_file)
-    for row in reader:
-        row = ' '.join(row)
-        cleanrow = clean_tweets(row, pos_words, neg_words, obscene, pos_emoji, neg_emoji)
-        data.append([cleanrow, '0'])
-
-    pos_csv_file = open('data/tweets/positive.csv', "rt", encoding='utf-8')
-    reader = csv.reader(pos_csv_file)
-    for row in reader:
-        row = ' '.join(row)
-        cleanrow = clean_tweets(row, pos_words, neg_words, obscene, pos_emoji, neg_emoji)
-        data.append([cleanrow, '1'])
-
-    neg_csv_file = open('data/tweets/negative.csv', "rt", encoding='utf-8')
-    reader = csv.reader(neg_csv_file)
-    for row in reader:
-        row = ' '.join(row)
-        cleanrow = clean_tweets(row, pos_words, neg_words, obscene, pos_emoji, neg_emoji)
-        data.append([cleanrow, '-1'])
+    for filename in os.listdir(texts_path):
+        csv_file = open(texts_path + filename, "r", encoding='utf-8')
+        reader = csv.reader(csv_file)
+        for row in reader:
+            row = ' '.join(row)
+            clean_row = clean_tweets(row, dictionaries[0],dictionaries[1], dictionaries[2],dictionaries[3], dictionaries[4])
+            data.append([clean_row, filename[:3]])
 
     random.shuffle(data)
     for i in data:
@@ -141,8 +111,8 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None, n_jobs=1, tr
     plt.title(title)
     if ylim is not None:
         plt.ylim(*ylim)
-    plt.xlabel(u"Объем тренировочной выборки")
-    plt.ylabel(u"Точность")
+    plt.xlabel(u"Training sample")
+    plt.ylabel(u"Accuracy")
     train_sizes, train_scores, test_scores = learning_curve(estimator, X, y, cv=cv, n_jobs=n_jobs,
                                                             train_sizes=train_sizes)
     train_scores_mean = np.mean(train_scores, axis=1)
@@ -157,12 +127,10 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None, n_jobs=1, tr
     plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
                      test_scores_mean + test_scores_std, alpha=0.1, color="g")
 
-    plt.plot(train_sizes, train_scores_mean, 'o-', color="r", label=u"Точность обучения")
-    plt.plot(train_sizes, test_scores_mean, 'o-', color="g", label=u"Точность тестирования")
+    plt.plot(train_sizes, train_scores_mean, 'o-', color="r", label=u"Training accuracy")
+    plt.plot(train_sizes, test_scores_mean, 'o-', color="g", label=u"Testing Accuracy")
 
     plt.legend(loc="best")
-    print(pd.DataFrame(train_scores))
-    print(pd.DataFrame(test_scores))
     return plt
 
 
@@ -186,24 +154,22 @@ def save_model(x, y, vector, clf):
     joblib.dump(vector, filename="vectorizer.pkl")
 
 
-def sentiment_analysis(text, sentiment):
+if __name__ == '__main__':
+
+    text, sentiment = load_data()
     token_pattern = r'\w+|[%s]' % string.punctuation
     vectorizer = CountVectorizer(ngram_range=(1, 2), token_pattern=token_pattern, binary=False, min_df=5)
     X = vectorizer.fit_transform(text)
-    print("Объем словаря: %s" % len(vectorizer.vocabulary_))
+    print("Vectorizer vocabulary: %s" % len(vectorizer.vocabulary_))
     classifier = LinearSVC()
-    print("Обучение модели")
+
+    print("Learning model")
     term_freq(X,vectorizer)
-    learning_curves(u'Кривая обучения', X, sentiment, classifier)
+    learning_curves(u'Learning curve', X, sentiment, classifier)
+
     X_train, X_test, y_train, y_test = train_test_split(X, sentiment, test_size=0.4)
     save_model(text, sentiment, vectorizer, classifier)
     classifier.fit(X_train, y_train)
     prediction = classifier.predict(X_test)
     print('accuracy_score ' + str(100*(accuracy_score(y_test, prediction))) + '%')
-    print(metrics.classification_report(y_test, prediction))
-
-
-if __name__ == '__main__':
-    pos_words, neg_words, stop_words, obscene, pos_emoji, neg_emoji = load_dict()
-    text, sentiment = load_data()
-    sentiment_analysis(text, sentiment)
+    print("Classification report\n" + metrics.classification_report(y_test, prediction))
