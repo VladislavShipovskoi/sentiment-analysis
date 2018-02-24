@@ -1,4 +1,4 @@
-from core import load_dict,clean_tweets
+from core import load_dict, clean_tweets
 from subprocess import Popen
 import settings
 import dataset
@@ -38,27 +38,39 @@ class StreamListener(tweepy.StreamListener):
             coords = json.dumps(coords)
 
         text_clean = list()
-        pos_words, neg_words, stop_words, obscene, pos_emoji, neg_emoji = load_dict()
-        text_clean.append(clean_tweets(text, pos_words, neg_words, obscene, pos_emoji, neg_emoji))
+        pos_words, neg_words, stop_words, obscene, pos_emoji, neg_emoji = \
+            load_dict()
+        text_clean.append(
+            clean_tweets(
+                text,
+                pos_words,
+                neg_words,
+                obscene,
+                pos_emoji,
+                neg_emoji
+            )
+        )
         X = self.vec.transform(text_clean)
         sentiment = (self.clf.predict(X[0]))[0]
         db = dataset.connect(settings.CONNECTION_STRING)
         table = db[settings.TABLE_NAME]
         try:
-            table.insert(dict(
-                user_name=name,
-                text=text,
-                sentiment=sentiment,
-                user_description=description,
-                user_location=loc,
-                coordinates=coords,
-                geo=geo,
-                user_created=user_created,
-                user_followers=followers,
-                id_str=id_str,
-                created=created,
-                retweet_count=retweets,
-            ))
+            table.insert(
+                dict(
+                    user_name=name,
+                    text=text,
+                    sentiment=sentiment,
+                    user_description=description,
+                    user_location=loc,
+                    coordinates=coords,
+                    geo=geo,
+                    user_created=user_created,
+                    user_followers=followers,
+                    id_str=id_str,
+                    created=created,
+                    retweet_count=retweets,
+                )
+            )
         except Exception:
             pass
 
@@ -71,9 +83,21 @@ if __name__ == '__main__':
     db = dataset.connect(settings.CONNECTION_STRING)
     print("Database created")
     Popen(["sqlite_web", "-p 8000", "database_tweets_stream.db"])
-    auth = tweepy.OAuthHandler(settings.TWITTER_APP_KEY, settings.TWITTER_APP_SECRET)
-    auth.set_access_token(settings.TWITTER_KEY, settings.TWITTER_SECRET)
+    auth = tweepy.OAuthHandler(
+        settings.TWITTER_APP_KEY,
+        settings.TWITTER_APP_SECRET
+    )
+    auth.set_access_token(
+        settings.TWITTER_KEY,
+        settings.TWITTER_SECRET
+    )
     api = tweepy.API(auth)
     stream_listener = StreamListener()
-    stream = tweepy.Stream(auth=api.auth, listener=stream_listener)
-    stream.filter(track=settings.TRACK_TERMS, languages=['ru'])
+    stream = tweepy.Stream(
+        auth=api.auth,
+        listener=stream_listener
+    )
+    stream.filter(
+        track=settings.TRACK_TERMS,
+        languages=['ru']
+    )
