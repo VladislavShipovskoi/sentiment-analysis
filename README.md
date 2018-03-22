@@ -23,4 +23,7 @@ This project determines the sentiment of Russian-language tweets.
 *TWITTER_APP_SECRET = "Enter api secret"
 *TWITTER_KEY = "Enter your access token key here"
 *TWITTER_SECRET = "Enter your access token secret here"
-9. python tweet_stream_listener.py
+1
+1
+1
+1
