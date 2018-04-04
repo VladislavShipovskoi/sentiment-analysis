@@ -18,12 +18,9 @@ This project determines the sentiment of Russian-language tweets.
 5. On the next page, click the "API Keys" tab along the top, then scroll all the way down until you see the section "Your Access Token"
 6. Click the button "Create My Access Token". You can Read more about Oauth authorization.
 7. You will now copy four values into **settings.py**. These values are your "API Key", your "API secret", your "Access token" and your "Access token secret". All four should now be visible on the API Keys page. (You may see "API Key" referred to as "Consumer key" in some places in the code or on the web; they are synonyms.)
-8.Open **settings.py** and set the variables corresponding to the api key, api secret, access token, and access secret. You will see code like the below:
-*TWITTER_APP_KEY = "Enter api key"
-*TWITTER_APP_SECRET = "Enter api secret"
-*TWITTER_KEY = "Enter your access token key here"
-*TWITTER_SECRET = "Enter your access token secret here"
-1
-1
-1
-1
+8. Open **settings.py** and set the variables corresponding to the api key, api secret, access token, and access secret. You will see code like the below:
+* TWITTER_APP_KEY = "Enter api key"
+* TWITTER_APP_SECRET = "Enter api secret"
+* TWITTER_KEY = "Enter your access token key here"
+* TWITTER_SECRET = "Enter your access token secret here"
+9. python tweet_stream_listener.py
