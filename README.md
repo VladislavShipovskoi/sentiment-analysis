@@ -5,12 +5,12 @@ This project determines the sentiment of Russian-language tweets.
 * requirements.txt - necessary libraries
 * settings.py - settings file for live stream
 * tweet_stream_listener.py - live stream russian tweets and sentiment analysis
-### startup instruction
+### Startup instruction
 1. virtualenv -p python3 venv
 2. pip install -r requirements.txt
 3. sudo apt-get install python3-tk
 4. python core.py
-### startup instruction live stream
+### Startup instruction live stream
 1. Create a twitter account if you do not already have one.
 2. Go to [Twitter Dev](https://apps.twitter.com/) and log in with your twitter credentials.
 3. Click "Create New App"
