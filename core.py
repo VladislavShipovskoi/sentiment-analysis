@@ -119,11 +119,11 @@ def cross_validation(x, y, vector, classifier):
         x_test = vector.transform(x_test)
         score_train.append(classifier.fit(
             x_train, y_train).score(x_train, y_train)
-        )
+                           )
         score_test.append(classifier.fit(
             x_train,
             y_train).score(x_test, y_test)
-        )
+                          )
         y_predicted = classifier.predict(x_test)
         print("*****")
         print("Отчет классификации - %s" % classifier)
@@ -134,7 +134,6 @@ def cross_validation(x, y, vector, classifier):
 def plot_learning_curve(estimator, title, x, y, ylim=None, cv=None, n_jobs=1,
                         train_sizes=np.linspace(.1, 1, 10)
                         ):
-
     font = {'family': 'Droid Sans',
             'weight': 'normal',
             'size': 14}
@@ -228,7 +227,6 @@ def save_model(x, y, vector, clf):
 
 
 if __name__ == '__main__':
-
     text, sentiment = load_data()
     token_pattern = r'\w+|[%s]' % string.punctuation
     vectorizer = CountVectorizer(
@@ -253,7 +251,8 @@ if __name__ == '__main__':
     classifier.fit(X_train, y_train)
     prediction = classifier.predict(X_test)
     print(
-        'accuracy_score ' + str(100*(accuracy_score(y_test, prediction))) + '%'
+        'accuracy_score ' + str(
+            100 * (accuracy_score(y_test, prediction))) + '%'
     )
     print(
         "Classification report\n" +
