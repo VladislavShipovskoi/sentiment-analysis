@@ -19,7 +19,7 @@ import re
 import os
 
 
-def clean_tweets(a, pos_words, pos_emoji, neg_emoji, neg_words, obscene):
+def clean_tweets(a, pos_words, pos_emoji, neg_words, neg_emoji):
     tokenizer = TweetTokenizer()
     a = tokenizer.tokenize(a)
 
@@ -32,8 +32,6 @@ def clean_tweets(a, pos_words, pos_emoji, neg_emoji, neg_words, obscene):
             a[n] = ' положительноеслово '
         if i in neg_words:
             a[n] = ' негативноеслово '
-        if i in obscene:
-            a[n] = ' обсценнаялексика '
 
     a = ' '.join(a)
     result = re.sub(r'(?:@[\w_]+)', '', a)  # упоминания
@@ -62,7 +60,7 @@ def load_dict():
     dictionaries = list()
     dictionaries_path = 'data/dictionary/'
     for filename in os.listdir(dictionaries_path):
-        with open(dictionaries_path + filename) as f:
+        with open(dictionaries_path + filename,encoding="utf8") as f:
             dictionary = f.read().splitlines()
             dictionaries.append(dictionary)
     return dictionaries
@@ -83,11 +81,10 @@ def load_data():
             row = ' '.join(row)
             clean_row = clean_tweets(
                 row,
-                dictionaries[0],
-                dictionaries[1],
-                dictionaries[2],
                 dictionaries[3],
-                dictionaries[4]
+                dictionaries[2],
+                dictionaries[1],
+                dictionaries[0]
             )
             data.append(
                 [clean_row,
